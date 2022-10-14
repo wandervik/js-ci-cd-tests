@@ -18,20 +18,23 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup node
-      uses: actions/setup-node@v2
-      with:
-        node-version: 16.10.0
+    # - name: Setup node
+    #   uses: actions/setup-node@v2
+    #   with:
+    #     node-version: 16.10.0
 
-    - name: Install dependencies
-      run: |
-        touch ~/.netrc
-        echo "machine github.com login ${{ inputs.access_token }}" > ~/.netrc
+      # - name: Install dependencies
+      #   run: |
+      #     touch ~/.netrc
+      #     echo "machine github.com login ${{ inputs.access_token }}" > ~/.netrc
+      #     npm ci
+      #   env:
+      #     NPM_TOKEN: ${{ inputs.npm_token }}
+      #   shell: bash
+
+    - name: Test install dependencied
+      run: touch dist/dependencies-installed.txt
       shell: bash
-
-    # - name: Test install dependencied
-    #   run: touch dist/dependencies-installed.txt
-    #   shell: bash
 
     # - run: npm run ${{ inputs.build-command }}
     - run: echo 'npm run ${{ inputs.build-command }}'

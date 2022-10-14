@@ -26,37 +26,43 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Get version
-        id: version
-        uses: notiz-dev/github-action-json-property@release
+      - id: version
+        uses: ./.github/actions/version
         with:
-            path: 'package.json'
-            prop_path: 'version'
-      - run: echo "prev_version=${{steps.version.outputs.prop}}" >> $GITHUB_ENV
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: |
-          mkdir temp
-          cp package.json temp/package.json
+      # - name: Get version
+      #   id: version
+      #   uses: notiz-dev/github-action-json-property@release
+      #   with:
+      #       path: 'package.json'
+      #       prop_path: 'version'
+      # - run: echo "prev_version=${{steps.version.outputs.prop}}" >> $GITHUB_ENV
 
-      - name:  'Automated Version Bump'
-        uses:  'phips28/gh-action-bump-version@master'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PACKAGEJSON_DIR:  'temp'
-        with:
-          minor-wording:  'MINOR_UPDATE'
-          major-wording:  'MAJOR_UPDATE'
-          patch-wording:  'PATCH_UPDATE'
-          skip-commit:  'true'
-          skip-tag: 'true'
+      # - run: |
+      #     mkdir temp
+      #     cp package.json temp/package.json
 
-      - name: Get new version
-        id: new_version
-        uses: notiz-dev/github-action-json-property@release
-        with:
-            path: 'temp/package.json'
-            prop_path: 'version'
-      - run: echo "new_version=${{steps.new_version.outputs.prop}}" >> $GITHUB_ENV
+      # - name:  'Automated Version Bump'
+      #   uses:  'phips28/gh-action-bump-version@master'
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     PACKAGEJSON_DIR:  'temp'
+      #   with:
+      #     minor-wording:  'MINOR_UPDATE'
+      #     major-wording:  'MAJOR_UPDATE'
+      #     patch-wording:  'PATCH_UPDATE'
+      #     skip-commit:  'true'
+      #     skip-tag: 'true'
+
+      # - name: Get new version
+      #   id: new_version
+      #   uses: notiz-dev/github-action-json-property@release
+      #   with:
+      #       path: 'temp/package.json'
+      #       prop_path: 'version'
+
+      - run: echo "new_version=${{steps.version.outputs.new-version}}" >> $GITHUB_ENV
 
       - name: Check if version isn't empty
         run: if [[ -z ${{ env.new_version }} ]]; then exit 1; else echo "Version isn't empty"; fi
@@ -71,6 +77,8 @@ jobs:
       - uses: ./.github/actions/build
         with:
           build-command: 'buildCDN:dev'
+          access_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
+          npm_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
 
       - name: Check if the version will be overrided
         id: folder-check
@@ -81,27 +89,13 @@ jobs:
         run: |
           aws s3 sync dist ${{ env.AWS_S3_PATH_DEV }}/${{ env.new_version }} --acl public-read --delete
 
-      - uses: actions/checkout@v2
-
-      - name: Update version in env file
-        uses: deef0000dragon1/json-edit-action/@v1
-        env:
-          KEY: 'dev_version'
-          VALUE: ${{ env.new_version }}
-          FILE: workflow-vars.json
-
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-         commit_message: Bump version
-         branch: release
-         file_pattern: workflow-vars.json
-
       - id: changelog_call
         uses: ./.github/actions/changelog
         with:
           branch_name: ${{ github.ref_name }}
           commit_message: ${{ github.event.head_commit.message }}
 
+      - uses: actions/checkout@v2
 
   # invalidation:
   #   runs-on: ubuntu-latest

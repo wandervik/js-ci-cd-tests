@@ -1,0 +1,52 @@
+name: 'Write chengelog'
+description: 'CHANGELOG  writer'
+inputs:
+  github-token:  # id of input
+    required: true
+    description: 'github-token'
+outputs:
+  new-version:
+    description: "Bumped version"
+    value: ${{ steps.new_version.outputs.prop }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get version
+      id: version
+      uses: notiz-dev/github-action-json-property@release
+      with:
+          path: 'package.json'
+          prop_path: 'version'
+    - run: echo "prev_version=${{steps.version.outputs.prop}}" >> $GITHUB_ENV
+      shell: bash
+
+    - run: |
+        mkdir temp
+        cp package.json temp/package.json
+      shell: bash
+
+    - name:  'Automated Version Bump'
+      uses:  'phips28/gh-action-bump-version@master'
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        PACKAGEJSON_DIR:  'temp'
+      with:
+        minor-wording:  'MINOR_UPDATE'
+        major-wording:  'MAJOR_UPDATE'
+        patch-wording:  'PATCH_UPDATE'
+        skip-commit:  'true'
+        skip-tag: 'true'
+
+    - name: Get new version
+      id: new_version
+      uses: notiz-dev/github-action-json-property@release
+      with:
+          path: 'temp/package.json'
+          prop_path: 'version'
+
+    # - run: echo "new_version=${{steps.new_version.outputs.prop}}" >> $GITHUB_ENV
+    #   shell: bash
+
+    # - name: Check if version isn't empty
+    #   run: if [[ -z ${{ env.new_version }} ]]; then exit 1; else echo "Version isn't empty"; fi
+    #   shell: bash
