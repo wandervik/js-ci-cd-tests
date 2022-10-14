@@ -10,3 +10,8 @@ Last commit message: remove tagging
 Last commit message: Merge pull request #1 from wandervik/main
 
 fix prod
+## Version 1.0.1
+[ 2022-10-14-11-41-53 ] : deployed on prod <br />
+Last commit message: Merge pull request #2 from wandervik/release
+
+Release
