@@ -1,10 +1,13 @@
 name: 'Write chengelog'
+description: 'CHANGELOG  writer'
 inputs:
   branch_name:  # id of input
     required: true
+    description: 'name of the branch'
     default: 'main'
   commit_message:
     required: true
+    description: 'name of the branch'
     default: 'Empty commit message'
 # outputs:
 #   random-number:
@@ -19,8 +22,8 @@ runs:
         ref: changelog
 
     - name: Pull repositiry
-      # env:
-      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: git pull
       shell: bash
 
