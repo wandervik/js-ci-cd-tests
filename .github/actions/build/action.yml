@@ -1,0 +1,34 @@
+name: 'Build'
+description: 'Build'
+inputs:
+  build-command:  # id of input
+    required: true
+    description: 'Build command'
+    # default: ''
+# outputs:
+#   random-number:
+#     description: "Random number"
+#     value: ${{ steps.random-number-generator.outputs.random-number }}
+runs:
+  using: "composite"
+  steps:
+    - name: Setup node
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16.10.0
+
+    # - name: Install dependencies
+    #   run: |
+    #     touch ~/.netrc
+    #     echo "machine github.com login ${{ secrets.REPOSITORY_ACCESS_TOKEN }}" > ~/.netrc
+    #     npm ci
+    #   env:
+    #     NPM_TOKEN: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
+    #   shell: bash
+    - name: Test install dependencied
+      run: touch dist/dependencies-installed.txt
+      shell: bash
+
+    # - run: npm run ${{ inputs.build-command }}
+    - run: echo 'npm run ${{ inputs.build-command }}'
+      shell: bash
