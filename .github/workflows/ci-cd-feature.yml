@@ -59,13 +59,6 @@ jobs:
         run: |
           aws s3 sync dist ${{ env.AWS_S3_PATH_DEV }}/${{ github.ref_name }} --acl public-read --delete
 
-      - name: Add tags to pushed files
-        run: |
-          aws s3api list-objects --bucket ${{ env.AWS_S3_BUCKET }} --prefix pageos/stage/${{ github.ref_name }} --query 'Contents[].{Key:Key}' --output text | \
-          xargs -n 1 -I targetobject aws s3api put-object-tagging --bucket ${{ env.AWS_S3_BUCKET }} \
-          --tagging "TagSet=[{Key=ApplicationId, Value=pageos}]" \
-          --key targetobject
-
       - name: Checkout changelog branch
         uses: actions/checkout@v2
         with:

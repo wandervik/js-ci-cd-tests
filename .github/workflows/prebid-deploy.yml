@@ -60,13 +60,6 @@ jobs:
           aws s3 cp gz ${{ env.AWS_S3_PATH_DEV }} --acl public-read --recursive --content-encoding gzip --content-type "text/javascript"
           aws s3 cp br ${{ env.AWS_S3_PATH_DEV }} --acl public-read --recursive --content-encoding br --content-type "text/javascript"
 
-      # - name: Add tags to pushed files
-      #   run: |
-      #     aws s3api list-objects --bucket ${{ env.AWS_S3_BUCKET }} --prefix prebid --query 'Contents[].{Key:Key}' --output text | \
-      #     xargs -n 1 -I targetobject aws s3api put-object-tagging --bucket ${{ env.AWS_S3_BUCKET }} \
-      #     --tagging "TagSet=[{Key=ApplicationId, Value=pageos}]" \
-      #     --key targetobject
-
       - name: Invalidate CloudFront
         uses: chetan/invalidate-cloudfront-action@v2
         env:
