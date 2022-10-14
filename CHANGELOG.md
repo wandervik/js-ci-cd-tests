@@ -58,3 +58,8 @@ Last commit message:
 Last commit message: Merge pull request #6 from wandervik/main
 
 version
+## Feature release
+[ 2022-10-14-16-53-11 ] : deployed on dev <br />
+Last commit message: Merge pull request #7 from wandervik/main
+
+remobe github env
