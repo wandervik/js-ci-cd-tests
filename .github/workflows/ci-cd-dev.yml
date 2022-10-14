@@ -68,20 +68,9 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # - name: Setup node
-      #   uses: actions/setup-node@v2
-      #   with:
-      #     node-version: 16.10.0
-
-      # - name: Install dependencies
-      #   run: |
-      #     touch ~/.netrc
-      #     echo "machine github.com login ${{ secrets.REPOSITORY_ACCESS_TOKEN }}" > ~/.netrc
-      #     npm ci
-      #   env:
-      #     NPM_TOKEN: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
-
-      # - run: npm run buildCDN:dev
+      - uses: ./.github/actions/build
+        with:
+          build-command: 'buildCDN:dev'
 
       - name: Check if the version will be overrided
         id: folder-check

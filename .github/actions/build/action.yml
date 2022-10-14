@@ -17,17 +17,17 @@ runs:
       with:
         node-version: 16.10.0
 
-    # - name: Install dependencies
-    #   run: |
-    #     touch ~/.netrc
-    #     echo "machine github.com login ${{ secrets.REPOSITORY_ACCESS_TOKEN }}" > ~/.netrc
-    #     npm ci
-    #   env:
-    #     NPM_TOKEN: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
-    #   shell: bash
-    - name: Test install dependencied
-      run: touch dist/dependencies-installed.txt
+    - name: Install dependencies
+      run: |
+        touch ~/.netrc
+        echo "machine github.com login ${{ secrets.REPOSITORY_ACCESS_TOKEN }}" > ~/.netrc
+      env:
+        NPM_TOKEN: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
       shell: bash
+
+    # - name: Test install dependencied
+    #   run: touch dist/dependencies-installed.txt
+    #   shell: bash
 
     # - run: npm run ${{ inputs.build-command }}
     - run: echo 'npm run ${{ inputs.build-command }}'
