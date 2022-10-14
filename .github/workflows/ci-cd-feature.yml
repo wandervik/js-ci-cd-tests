@@ -1,0 +1,113 @@
+name: STAGE Feature Deployment
+
+on:
+  workflow_dispatch
+
+env:
+  AWS_REGION: "eu-central-1"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_S3_PATH_DEV: s3://intergi-duplicate/pageos
+  AWS_S3_BUCKET: intergi-duplicate
+  DISTRIBUTION_ID: E3MY6RLJJ44XBK
+
+jobs:
+  feature-deploy:
+    outputs:
+      folder-check: ${{ steps.folder-check.outputs.result }}
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Create a temp package.json
+        run: |
+          mkdir temp
+          cp package.json temp/package.json
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.10.0
+
+      - name: Install dependencies
+        run: |
+          touch ~/.netrc
+          echo "machine github.com login ${{ secrets.REPOSITORY_ACCESS_TOKEN }}" > ~/.netrc
+          npm ci
+        env:
+          NPM_TOKEN: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
+
+      - run: npm run buildCDN:feature
+
+      - name: Check if the version will be overrided
+        id: folder-check
+        run: |
+          echo "::set-output name=result::$(if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ github.ref_name }}| head) ]]; then echo "overriding"; else echo "new-folder"; fi)"
+
+      - name: Push to bucket
+        run: |
+          aws s3 sync dist ${{ env.AWS_S3_PATH_DEV }}/${{ github.ref_name }} --acl public-read --delete
+
+      - name: Add tags to pushed files
+        run: |
+          aws s3api list-objects --bucket ${{ env.AWS_S3_BUCKET }} --prefix pageos/stage/${{ github.ref_name }} --query 'Contents[].{Key:Key}' --output text | \
+          xargs -n 1 -I targetobject aws s3api put-object-tagging --bucket ${{ env.AWS_S3_BUCKET }} \
+          --tagging "TagSet=[{Key=ApplicationId, Value=pageos}]" \
+          --key targetobject
+
+      - name: Checkout changelog branch
+        uses: actions/checkout@v2
+        with:
+          ref: changelog
+
+      - name: Pull repositiry
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git pull
+
+      - name: Get current timestamp
+        id: time
+        uses: nanzm/get-time-action@v1.1
+        with:
+          timeZone: -5
+          format: 'YYYY-MM-DD-HH-mm-ss'
+
+      - name: Write changelog
+        env:
+          TIME: "${{ steps.time.outputs.time }}"
+        run: |
+          echo "## Feature ${{ github.ref_name }}" >> CHANGELOG.md
+          echo "[ ${{ env.TIME }} ] : deployed on dev <br />" >> CHANGELOG.md
+          echo "Last commit message: ${{ github.event.head_commit.message }}" >> CHANGELOG.md
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+         commit_message: Automated Change
+         branch: changelog
+         file_pattern: CHANGELOG.md
+
+  invalidation:
+    runs-on: ubuntu-latest
+    needs: feature-deploy
+    if: needs.feature-deploy.outputs.folder-check == 'overriding'
+
+    steps:
+      - name: Invalidate CloudFront
+        uses: chetan/invalidate-cloudfront-action@v2
+        env:
+          DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
+          PATHS: "/pageos/stage/${{ github.ref_name }}/*"
+          AWS_REGION: ${{ env.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
