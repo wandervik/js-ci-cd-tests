@@ -63,3 +63,8 @@ version
 Last commit message: Merge pull request #7 from wandervik/main
 
 remobe github env
+## Feature master
+[ 2022-10-14-16-58-31 ] : deployed on dev <br />
+Last commit message: Merge pull request #8 from wandervik/main
+
+prod
