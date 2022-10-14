@@ -63,10 +63,10 @@ jobs:
     if: needs.feature-deploy.outputs.folder-check == 'overriding'
     uses: ./.github/workflows/invalidation.yml
     with:
-      aws-role: ${{ env.AWS_ROLE }}
+      aws-role: arn:aws:iam::519140963702:role/TestGithubActionsRole
       path: "/pageos/stage/${{ github.ref_name }}/*"
-      distribution-id: ${{ env.DISTRIBUTION_ID }}
-      aws-region: ${{ env.AWS_REGION }}
+      distribution-id: E3MY6RLJJ44XBK
+      aws-region: eu-central-1
 
 
 
