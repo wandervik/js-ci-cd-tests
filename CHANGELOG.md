@@ -31,3 +31,8 @@ Last commit message:
 ## Feature main
 [ 2022-10-14-15-00-33 ] : deployed on dev <br />
 Last commit message: 
+## Feature release
+[ 2022-10-14-15-02-13 ] : deployed on dev <br />
+Last commit message: Merge pull request #4 from wandervik/main
+
+test
