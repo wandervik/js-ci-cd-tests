@@ -5,31 +5,32 @@ on:
 
 env:
   AWS_REGION: "eu-central-1"
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_S3_PATH_DEV: s3://intergi-duplicate/pageos-prebid
   AWS_S3_BUCKET: intergi-duplicate
   DISTRIBUTION_ID: E3MY6RLJJ44XBK
+  AWS_ROLE: arn:aws:iam::519140963702:role/TestGithubActionsRole
 
 jobs:
   build-deploy-dev:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           persist-credentials: false
 
-      - run: |
-          mkdir temp
-          cp package.json temp/package.json
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - run: |
+          mkdir temp
+          cp package.json temp/package.json
 
       - uses: ./.github/actions/build
         with:
@@ -56,9 +57,6 @@ jobs:
       #   env:
       #     DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
       #     PATHS: "/prebid/*"
-      #     AWS_REGION: ${{ env.AWS_REGION }}
-      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - id: changelog_call
         uses: ./.github/actions/changelog
