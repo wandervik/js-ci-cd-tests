@@ -68,3 +68,6 @@ remobe github env
 Last commit message: Merge pull request #8 from wandervik/main
 
 prod
+## Feature main
+[ 2022-10-14-17-17-20 ] : deployed on dev <br />
+Last commit message: MAJOR_UPDATE
