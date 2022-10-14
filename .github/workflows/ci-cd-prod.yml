@@ -2,7 +2,7 @@ name: PROD S3 Continuous Deployment
 
 on:
   push:
-    branches: [ 'master' ]
+    branches: [ 'main' ]
 
 env:
   AWS_REGION: "eu-central-1"
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout
