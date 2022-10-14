@@ -74,3 +74,6 @@ Last commit message: MAJOR_UPDATE
 ## Feature main
 [ 2022-10-14-17-30-47 ] : deployed on dev <br />
 Last commit message: 
+## Feature main
+[ 2022-10-14-17-58-05 ] : deployed on dev <br />
+Last commit message: 
