@@ -4,6 +4,12 @@ inputs:
   build-command:  # id of input
     required: true
     description: 'Build command'
+  access_token:  # id of input
+    required: true
+    description: 'Token'
+  npm_token:  # id of input
+    required: true
+    description: 'Token'
     # default: ''
 # outputs:
 #   random-number:
@@ -20,7 +26,7 @@ runs:
     - name: Install dependencies
       run: |
         touch ~/.netrc
-        echo "machine github.com login ${{ secrets.REPOSITORY_ACCESS_TOKEN }}" > ~/.netrc
+        echo "machine github.com login ${{ inputs.access_token }}" > ~/.netrc
       shell: bash
 
     # - name: Test install dependencied
