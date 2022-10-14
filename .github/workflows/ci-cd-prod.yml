@@ -74,7 +74,7 @@ jobs:
       #   env:
       #     NPM_TOKEN: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
 
-      - run: npm run buildCDN:prod
+      # - run: npm run buildCDN:prod
 
       - name: Prevent overriding old version
         run: |
