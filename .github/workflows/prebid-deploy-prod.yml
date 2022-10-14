@@ -53,11 +53,11 @@ jobs:
           aws s3 cp gz ${{ env.AWS_S3_PATH_PROD }} --acl public-read --recursive --content-encoding gzip --content-type "text/javascript"
           aws s3 cp br ${{ env.AWS_S3_PATH_PROD }} --acl public-read --recursive --content-encoding br --content-type "text/javascript"
 
-      - name: Invalidate CloudFront
-        uses: chetan/invalidate-cloudfront-action@v2
-        env:
-          DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
-          PATHS: "/prebid/*"
+      # - name: Invalidate CloudFront
+      #   uses: chetan/invalidate-cloudfront-action@v2
+      #   env:
+      #     DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
+      #     PATHS: "/prebid/*"
 
       - id: changelog_call
         uses: ./.github/actions/changelog
