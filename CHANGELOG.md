@@ -36,3 +36,8 @@ Last commit message:
 Last commit message: Merge pull request #4 from wandervik/main
 
 test
+## Feature master
+[ 2022-10-14-15-05-40 ] : deployed on dev <br />
+Last commit message: Merge pull request #5 from wandervik/release
+
+Release
