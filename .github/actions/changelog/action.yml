@@ -21,11 +21,11 @@ runs:
       with:
         ref: changelog
 
-    - name: Pull repositiry
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: git pull
-      shell: bash
+    # - name: Pull repositiry
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   run: git pull
+    #   shell: bash
 
     - name: Get current timestamp
       id: time
