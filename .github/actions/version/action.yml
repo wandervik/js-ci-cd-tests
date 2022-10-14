@@ -1,4 +1,4 @@
-name: 'Write chengelog'
+name: 'Write version'
 description: 'CHANGELOG  writer'
 inputs:
   github-token:  # id of input
