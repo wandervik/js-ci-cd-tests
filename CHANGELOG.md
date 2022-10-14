@@ -17,3 +17,5 @@ Last commit message: Merge pull request #2 from wandervik/release
 Release
 ## Prebid content
 [ 2022-10-14-11-43-06 ] : deployed on dev <br />
+## Prebid content
+[ 2022-10-14-11-46-01 ] : deployed on prod <br />
