@@ -58,20 +58,7 @@ jobs:
 
       - uses: actions/checkout@v2
 
-  invalidation:
-    needs: feature-deploy
-    if: needs.feature-deploy.outputs.folder-check == 'overriding'
-    uses: ./.github/workflows/invalidation.yml
-    with:
-      aws-role: arn:aws:iam::519140963702:role/TestGithubActionsRole
-      path: "/pageos/stage/${{ github.ref_name }}/*"
-      distribution-id: E3MY6RLJJ44XBK
-      aws-region: eu-central-1
-
-
-
-
-
+#  invalidation:
     # runs-on: ubuntu-latest
     # permissions:
     #   id-token: write
