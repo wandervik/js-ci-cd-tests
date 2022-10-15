@@ -5,7 +5,7 @@ on:
 
 jobs:
   deploy-prebid-dev:
-    if: github.ref != 'refs/heads/master'
+    if: github.ref == 'refs/heads/release'
     uses: ./.github/workflows/prebid-deployment.yml
     with:
       aws-region: "eu-central-1"
