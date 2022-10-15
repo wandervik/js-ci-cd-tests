@@ -69,7 +69,7 @@ jobs:
         id-token: write
         contents: read
       needs: feature-deploy
-      if: ${{ env.result }} == 'overriding'
+      if: env.result == 'overriding'
 
       steps:
         - name: Configure AWS credentials
