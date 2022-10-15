@@ -8,11 +8,9 @@ inputs:
   commit_message:
     required: true
     description: 'name of the branch'
-    default: 'Empty commit message'
-# outputs:
-#   random-number:
-#     description: "Random number"
-#     value: ${{ steps.random-number-generator.outputs.random-number }}
+  github-token:
+    required: true
+    description: 'github token'
 runs:
   using: "composite"
   steps:
@@ -20,6 +18,12 @@ runs:
       uses: actions/checkout@v2
       with:
         ref: changelog
+
+    - name: Pull repositiry
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: git pull
+      shell: bash
 
     - name: Get current timestamp
       id: time
