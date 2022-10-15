@@ -5,6 +5,7 @@ on:
 
 jobs:
   deploy-prebid-dev:
+    if: github.ref != 'refs/heads/release'
     uses: ./.github/workflows/prebid-deployment.yml
     with:
       aws-region: "eu-central-1"
@@ -14,3 +15,12 @@ jobs:
       aws-role: arn:aws:iam::519140963702:role/TestGithubActionsRole
 
 
+  deploy-prebid-prod:
+    if: github.ref == 'refs/heads/master'
+    uses: ./.github/workflows/prebid-deployment.yml
+    with:
+      aws-region: "eu-central-1"
+      s3-path: s3://intergi-duplicate/pageos-prebid-prod
+      s3-bucket: intergi-duplicate
+      distribution-id: E3MY6RLJJ44XBK
+      aws-role: arn:aws:iam::519140963702:role/TestGithubActionsRole
