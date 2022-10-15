@@ -69,17 +69,19 @@ jobs:
         id-token: write
         contents: read
       needs: feature-deploy
-      if: env.result == 'overriding'
+      # if: env.result == 'overriding'
 
       steps:
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v1
-          with:
-            role-to-assume: ${{ env.AWS_ROLE }}
-            aws-region: ${{ env.AWS_REGION }}
+        - name: DEBUG
+          run: echo "${{ env.result }}"
+        # - name: Configure AWS credentials
+        #   uses: aws-actions/configure-aws-credentials@v1
+        #   with:
+        #     role-to-assume: ${{ env.AWS_ROLE }}
+        #     aws-region: ${{ env.AWS_REGION }}
 
-        - name: Invalidate CloudFront
-          uses: chetan/invalidate-cloudfront-action@v2
-          env:
-            DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
-            PATHS: "/pageos/stage/${{ github.ref_name }}/*"
+        # - name: Invalidate CloudFront
+        #   uses: chetan/invalidate-cloudfront-action@v2
+        #   env:
+        #     DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
+        #     PATHS: "/pageos/stage/${{ github.ref_name }}/*"
