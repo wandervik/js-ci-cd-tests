@@ -6,8 +6,6 @@ on:
 
 env:
   AWS_REGION: "eu-central-1"
-  # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} test
-  # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_S3_PATH_DEV: s3://intergi-duplicate/pageos
   AWS_S3_PATH_PROD: s3://intergi-duplicate/pageos-prod
   AWS_S3_BUCKET: intergi-duplicate
@@ -19,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout

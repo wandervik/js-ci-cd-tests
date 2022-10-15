@@ -6,11 +6,10 @@ on:
 
 env:
   AWS_REGION: "eu-central-1"
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_S3_PATH_DEV: s3://intergi-duplicate/pageos
   AWS_S3_BUCKET: intergi-duplicate
   DISTRIBUTION_ID: E3MY6RLJJ44XBK
+  AWS_ROLE: arn:aws:iam::519140963702:role/TestGithubActionsRole
 
 
 jobs:
@@ -18,30 +17,29 @@ jobs:
     outputs:
       version: ${{ steps.new_version.outputs.prop }}
       folder-check: ${{ steps.folder-check.outputs.result }}
-
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           persist-credentials: false
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - id: version
         uses: ./.github/actions/version
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # - run: echo "new_version=${{steps.version.outputs.new-version}}" >> $GITHUB_ENV
-
       - name: Check if version isn't empty
         run: if [[ -z ${{steps.version.outputs.new-version}} ]]; then exit 1; else echo "Version isn't empty"; fi
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
 
       - uses: ./.github/actions/build
         with:
@@ -68,15 +66,20 @@ jobs:
 
   # invalidation:
   #   runs-on: ubuntu-latest
+  #   permissions:
+  #     id-token: write
+  #     contents: write
   #   needs: build-deploy-dev
   #   if: needs.build-deploy-dev.outputs.folder-check == 'overriding'
-
   #   steps:
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         role-to-assume: ${{ env.AWS_ROLE }}
+  #         aws-region: ${{ env.AWS_REGION }}
+
   #     - name: Invalidate CloudFront
   #       uses: chetan/invalidate-cloudfront-action@v2
   #       env:
   #         DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
   #         PATHS: "/pageos/${{needs.build-deploy-dev.outputs.version}}/*"
-  #         AWS_REGION: ${{ env.AWS_REGION }}
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
