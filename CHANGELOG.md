@@ -124,3 +124,6 @@ Last commit message:
 Last commit message: Merge pull request #14 from wandervik/main
 
 test
+## Feature bump-commit
+[ 2022-11-02-08-35-35 ] : deployed on dev <br />
+Last commit message: test MAJOR_UPDATE bump
