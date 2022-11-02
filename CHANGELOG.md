@@ -127,3 +127,6 @@ test
 ## Feature bump-commit
 [ 2022-11-02-08-35-35 ] : deployed on dev <br />
 Last commit message: test MAJOR_UPDATE bump
+## Feature bump-commit
+[ 2022-11-02-08-38-19 ] : deployed on dev <br />
+Last commit message: Merge branch 'bump-commit' of github.com:wandervik/js-ci-cd-tests into bump-commit
