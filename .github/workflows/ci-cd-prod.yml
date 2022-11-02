@@ -63,10 +63,10 @@ jobs:
           patch-wording:  'PATCH_UPDATE'
           commit-message: 'Bumped version number. Current version: {{version}}'
 
-      - id: changelog_call
-        uses: ./.github/actions/changelog
-        with:
-          branch_name: ${{ github.ref_name }}
-          commit_message: ${{ github.event.head_commit.message }}
+      # - id: changelog_call
+      #   uses: ./.github/actions/changelog
+      #   with:
+      #     branch_name: ${{ github.ref_name }}
+      #     commit_message: ${{ github.event.head_commit.message }}
 
-      - uses: actions/checkout@v2
+      # - uses: actions/checkout@v2
