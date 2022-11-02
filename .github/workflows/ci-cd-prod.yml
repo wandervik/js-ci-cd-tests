@@ -6,7 +6,7 @@ on:
 
 env:
   AWS_REGION: "eu-central-1"
-  # AWS_S3_PATH_DEV: s3://intergi-duplicate/pageos
+  # AWS_S3_PATH_DEV: s3://intergi-duplicate/pageos test
   AWS_S3_PATH_PROD: s3://intergi-duplicate/pageos-prod
   AWS_S3_BUCKET: intergi-duplicate
   AWS_PATH_DEV: pageos
