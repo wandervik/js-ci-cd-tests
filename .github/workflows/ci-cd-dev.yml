@@ -15,7 +15,7 @@ env:
 jobs:
   build-deploy-dev:
     outputs:
-      version: ${{ steps.new_version.outputs.prop }}
+      version: ${{ steps.version.outputs.new-version }}
       folder-check: ${{ steps.folder-check.outputs.result }}
     runs-on: ubuntu-latest
     permissions:
