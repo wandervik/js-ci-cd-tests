@@ -20,12 +20,12 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           persist-credentials: false
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
@@ -41,10 +41,15 @@ jobs:
           access_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
           npm_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
 
+      # - name: Check if the version will be overrided
+      #   id: folder-check
+      #   run: |
+      #     echo "::set-output name=result::$(if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ github.ref_name }}| head) ]]; then echo "overriding"; else echo "new-folder"; fi)"
+
       - name: Check if the version will be overrided
         id: folder-check
         run: |
-          echo "::set-output name=result::$(if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ github.ref_name }}| head) ]]; then echo "overriding"; else echo "new-folder"; fi)"
+          echo "result=$(if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ github.ref_name }}| head) ]]; then echo "overriding"; else echo "new-folder"; fi)" >> $GITHUB_OUTPUT
 
       - name: Push to bucket
         run: |
@@ -58,23 +63,27 @@ jobs:
 
       - uses: actions/checkout@v2
 
-#  invalidation:
-    # runs-on: ubuntu-latest
-    # permissions:
-    #   id-token: write
-    #   contents: read
-    # needs: feature-deploy
-    # if: needs.feature-deploy.outputs.folder-check == 'overriding'
+      - name: Display summary
+        run: echo "### Deployed to https://test/${{ github.ref_name }} :rocket:" >> $GITHUB_STEP_SUMMARY
 
-    # steps:
-    #   - name: Configure AWS credentials
-    #     uses: aws-actions/configure-aws-credentials@v1
-    #     with:
-    #       role-to-assume: ${{ env.AWS_ROLE }}
-    #       aws-region: ${{ env.AWS_REGION }}
+  # invalidation:
+  #     runs-on: ubuntu-latest
+  #     permissions:
+  #       id-token: write
+  #       contents: read
+  #     needs: feature-deploy
+  #     if: needs.feature-deploy.outputs.folder-check == 'overriding'
 
-    #   - name: Invalidate CloudFront
-    #     uses: chetan/invalidate-cloudfront-action@v2
-    #     env:
-    #       DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
-    #       PATHS: "/pageos/stage/${{ github.ref_name }}/*"
+  #     steps:
+  #       - name: Configure AWS credentials
+  #         uses: aws-actions/configure-aws-credentials@v1-node16
+  #         with:
+  #           role-to-assume: ${{ env.AWS_ROLE }}
+  #           aws-region: ${{ env.AWS_REGION }}
+
+  #       - name: Invalidate CloudFront
+  #         uses: chetan/invalidate-cloudfront-action@v2
+  #         env:
+  #           DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
+  #           PATHS: "/pageos/stage/${{ github.ref_name }}/*"
+
