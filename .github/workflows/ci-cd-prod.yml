@@ -6,7 +6,7 @@ on:
 
 env:
   AWS_REGION: "eu-central-1"
-  # AWS_S3_PATH_DEV: s3://intergi-duplicate/pageos test
+  # AWS_S3_PATH_DEV: s3://intergi-duplicate/pageos
   AWS_S3_PATH_PROD: s3://intergi-duplicate/pageos-prod
   AWS_S3_BUCKET: intergi-duplicate
   AWS_PATH_DEV: pageos
@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Commit bumped version
-        uses:  'phips28/gh-action-bump-version@bump-commit'
+        uses:  'phips28/gh-action-bump-version@master'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
