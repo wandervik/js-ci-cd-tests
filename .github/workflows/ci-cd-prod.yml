@@ -51,7 +51,7 @@ jobs:
         run: |
           aws s3 sync dist ${{ env.AWS_S3_PATH_PROD }}/${{steps.version.outputs.new-version}} --acl public-read
 
-      - uses: actions/checkout@v2
+      # - uses: actions/checkout@v2
 
       - name: Commit bumped version
         uses:  'phips28/gh-action-bump-version@master'
