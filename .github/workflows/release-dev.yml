@@ -1,0 +1,122 @@
+name: DEV Manual Release
+
+on:
+  push:
+    tags:
+    - 'rc-v*'
+
+env:
+  AWS_REGION: "eu-central-1"
+  AWS_S3_PATH_DEV: s3://intergi-duplicate/pageos
+  AWS_S3_BUCKET: intergi-duplicate
+  DISTRIBUTION_ID: E3MY6RLJJ44XBK
+  AWS_ROLE: arn:aws:iam::519140963702:role/TestGithubActionsRole
+
+jobs:
+  build-deploy-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.new-version }}
+      folder-check: ${{ steps.folder-check.outputs.result }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Check if the version will be overrided
+        id: folder-check
+        run: |
+          echo "result=$(if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ github.ref_name }}| head) ]]; then echo "overriding"; else echo "new-folder"; fi)" >> $GITHUB_OUTPUT
+
+      - name: Get new version
+        id: version
+        run: |
+          export tag_name='${{ github.ref_name }}'
+          echo "new-version=$(echo ${tag_name/rc-v/})" >> $GITHUB_OUTPUT
+
+      # - run: echo "new_version=${{ steps.version.outputs.VERSION }}" >> $GITHUB_ENV
+
+      - name: Check if version isn't empty
+        run: if [[ -z ${{ steps.version.outputs.new-version }} ]]; then exit 1; else echo "Version isn't empty"; fi
+
+      # - name: Setup node
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: 16.10.0
+
+      # - run: npm i
+
+      # - run: npm run build:production -- --publicpath //devcdn.playwire.com/bolt-releases/${{ env.new_version }}/zeus/
+
+      - name: Check if the version will be overrided
+        id: folder-check
+        run: |
+          echo "result=$(if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ steps.version.outputs.new-version }}| head) ]]; then echo "overriding"; else echo "new-folder"; fi)"  >> $GITHUB_OUTPUT
+
+      - name: Push to bucket
+        run: |
+          aws s3 sync build/production ${{ env.AWS_S3_PATH_DEV }}/${{ steps.version.outputs.new-version }} --acl public-read --delete
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build/production/
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build-deploy-dev
+
+    steps:
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: build
+        path: build
+
+    - name: Archive artifacts
+      run: zip -r build.zip build
+
+    - name: Get release
+      id: get_release
+      uses: bruceadams/get-release@v1.2.3
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get_release.outputs.upload_url }}
+        asset_path: build.zip
+        asset_name: build.zip
+        asset_content_type: application/zip
+
+  invalidation:
+    runs-on: ubuntu-latest
+    needs: build-deploy-dev
+    permissions:
+      id-token: write
+      contents: write
+    if: needs.build-deploy-dev.outputs.folder-check == 'overriding'
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Invalidate CloudFront
+        uses: chetan/invalidate-cloudfront-action@v2
+        env:
+          DISTRIBUTION: ${{ env.DISTRIBUTION_ID }}
+          PATHS: "/bolt-releases/${{needs.build-deploy-dev.outputs.version}}/*"
