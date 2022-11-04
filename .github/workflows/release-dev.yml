@@ -52,6 +52,7 @@ jobs:
           KEY: 'version'
           VALUE: ${{ steps.version.outputs.new-version }}
           FILE: temp/package.json
+      - run: cat temp/package.json
 
       # - name: Setup node
       #   uses: actions/setup-node@v2
@@ -75,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build
-          path: build/production/
+          path: dist/
 
   release:
     runs-on: ubuntu-latest
