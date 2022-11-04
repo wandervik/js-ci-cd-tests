@@ -42,6 +42,17 @@ jobs:
       - name: Check if version isn't empty
         run: if [[ -z ${{ steps.version.outputs.new-version }} ]]; then exit 1; else echo "Version isn't empty"; fi
 
+      - run: |
+          mkdir temp
+          cp package.json temp/package.json
+
+      - name: Update version in package.json
+        uses: deef0000dragon1/json-edit-action/@v1
+        env:
+          KEY: 'version'
+          VALUE: ${{ steps.version.outputs.new-version }}
+          FILE: temp/package.json
+
       # - name: Setup node
       #   uses: actions/setup-node@v2
       #   with:
@@ -58,7 +69,7 @@ jobs:
 
       - name: Push to bucket
         run: |
-          aws s3 sync build/production ${{ env.AWS_S3_PATH_DEV }}/${{ steps.version.outputs.new-version }} --acl public-read --delete
+          aws s3 sync dist ${{ env.AWS_S3_PATH_DEV }}/${{ steps.version.outputs.new-version }} --acl public-read --delete
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
