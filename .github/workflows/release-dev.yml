@@ -31,11 +31,6 @@ jobs:
           role-to-assume: ${{ env.AWS_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Check if the version will be overrided
-        id: folder-check
-        run: |
-          echo "result=$(if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_DEV }}/${{ github.ref_name }}| head) ]]; then echo "overriding"; else echo "new-folder"; fi)" >> $GITHUB_OUTPUT
-
       - name: Get new version
         id: version
         run: |
