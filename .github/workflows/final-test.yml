@@ -51,9 +51,9 @@ jobs:
           access_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
           npm_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
 
-      - name: Prevent overriding old version
-        run: |
-          if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_PROD }}/${{steps.version.outputs.new-version}} | head) ]]; then exit 1; else echo "New version doesn't exist"; fi
+      # - name: Prevent overriding old version
+      #   run: |
+      #     if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_PROD }}/${{steps.version.outputs.new-version}} | head) ]]; then exit 1; else echo "New version doesn't exist"; fi
       - name: Push to bucket
         run: |
           aws s3 sync dist ${{ env.AWS_S3_PATH_PROD }}/${{steps.version.outputs.new-version}} --acl public-read
