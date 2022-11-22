@@ -23,14 +23,13 @@ runs:
     #   with:
     #     node-version: 16.10.0
 
-      # - name: Install dependencies
-      #   run: |
-      #     touch ~/.netrc
-      #     echo "machine github.com login ${{ inputs.access_token }}" > ~/.netrc
-      #     npm ci
-      #   env:
-      #     NPM_TOKEN: ${{ inputs.npm_token }}
-      #   shell: bash
+    - name: Install dependencies
+      run: |
+        touch ~/.netrc
+        echo "machine github.com login ${{ inputs.access_token }}" > ~/.netrc
+      env:
+        NPM_TOKEN: ${{ inputs.npm_token }}
+      shell: bash
 
     - name: Test install dependencied
       run: touch dist/dependencies-installed.txt

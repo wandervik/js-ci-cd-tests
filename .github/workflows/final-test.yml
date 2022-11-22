@@ -1,0 +1,126 @@
+name: PROD Continuous Deployment
+
+on:
+  push:
+    branches: [ 'master' ]
+
+env:
+  AWS_REGION: "eu-central-1"
+  AWS_S3_PATH_PROD: s3://intergi-duplicate/pageos-prod
+  AWS_S3_BUCKET: intergi-duplicate
+  AWS_ROLE: arn:aws:iam::519140963702:role/TestGithubActionsRole
+
+jobs:
+  build-deploy-prod:
+    outputs:
+      version: ${{steps.version.outputs.new-version}}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      # - name: Get composite run steps repository
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository:  intergi/PageOS
+      #     ref: ci-cd-refactoring
+      #     # Personal access token to check out private repository
+      #     token: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
+      #     # Indicate where to check action out to
+      #     path: composite-actions
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ env.AWS_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - id: version
+        uses: ./.github/actions/version
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: ./.github/actions/build
+        with:
+          build-command: 'buildCDN:prod'
+          access_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
+          npm_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
+
+      - name: Prevent overriding old version
+        run: |
+          if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_PROD }}/${{steps.version.outputs.new-version}} | head) ]]; then exit 1; else echo "New version doesn't exist"; fi
+      - name: Push to bucket
+        run: |
+          aws s3 sync prod ${{ env.AWS_S3_PATH_PROD }}/${{steps.version.outputs.new-version}} --acl public-read
+      - name: Commit bumped version
+        uses:  'phips28/gh-action-bump-version@master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag-prefix:     'v'
+          minor-wording:  'MINOR_UPDATE'
+          major-wording:  'MAJOR_UPDATE'
+          patch-wording:  'PATCH_UPDATE'
+          commit-message: 'Bumped version number. Current version: {{version}}'
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: prod/
+
+      - name: Display summary
+        run: echo "### Deployed to https://cdn.intergi.com/hera/releases/${{steps.version.outputs.new-version}}/tyche.js :rocket:" >> $GITHUB_STEP_SUMMARY
+
+      # Changelog disabled due to replacing it with Github Releases
+      # - id: changelog_call
+      #   uses: ./composite-actions/.github/actions/changelog
+      #   with:
+      #     branch_name: ${{ github.ref_name }}
+      #     commit_message: ${{ github.event.head_commit.message }}
+      # - uses: actions/checkout@v2
+
+  release:
+      runs-on: ubuntu-latest
+      needs: build-deploy-prod
+
+      steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: build
+          path: build
+
+      - name: Archive artifacts
+        run: zip -r build.zip build
+
+      - name: Create Draft Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{needs.build-deploy-prod.outputs.version}}
+          release_name: Release ${{needs.build-deploy-prod.outputs.version}}
+          draft: true
+          prerelease: false
+
+      - uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build.zip
+          asset_name: build.zip
+          asset_content_type: application/zip
+
+      - uses: eregon/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ steps.create_release.outputs.id }}

@@ -2,7 +2,7 @@ name: PROD S3 Continuous Deployment
 
 on:
   push:
-    branches: [ 'master' ]
+    branches: [ 'main' ]
 
 env:
   AWS_REGION: "eu-central-1"
@@ -43,15 +43,15 @@ jobs:
           access_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN }}
           npm_token: ${{ secrets.REPOSITORY_ACCESS_TOKEN_PACKAGES }}
 
-      - name: Prevent overriding old version
-        run: |
-          if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_PROD }}/${{steps.version.outputs.new-version}}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
+      # - name: Prevent overriding old version
+      #   run: |
+      #     if [[ $(aws s3 ls ${{ env.AWS_S3_PATH_PROD }}/${{steps.version.outputs.new-version}}| head) ]]; then exit 1; else echo "New version doesn't exist"; fi
 
       - name: Push to bucket
         run: |
           aws s3 sync dist ${{ env.AWS_S3_PATH_PROD }}/${{steps.version.outputs.new-version}} --acl public-read
 
-      - uses: actions/checkout@v2
+      # - uses: actions/checkout@v2
 
       - name: Commit bumped version
         uses:  'phips28/gh-action-bump-version@master'
@@ -63,10 +63,10 @@ jobs:
           patch-wording:  'PATCH_UPDATE'
           commit-message: 'Bumped version number. Current version: {{version}}'
 
-      - id: changelog_call
-        uses: ./.github/actions/changelog
-        with:
-          branch_name: ${{ github.ref_name }}
-          commit_message: ${{ github.event.head_commit.message }}
+      # - id: changelog_call
+      #   uses: ./.github/actions/changelog
+      #   with:
+      #     branch_name: ${{ github.ref_name }}
+      #     commit_message: ${{ github.event.head_commit.message }}
 
-      - uses: actions/checkout@v2
+      # - uses: actions/checkout@v2
